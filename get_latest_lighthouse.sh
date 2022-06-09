@@ -56,11 +56,13 @@ else
 fi
 
 # check for existing lighthouse
-printf "Check for existing lighthouse installation:"
+printf "Check for existing lighthouse installation: "
 if hash lighthouse 2>/dev/null; then
   printf " \u2705\n"
   # save existing lighthouse version
   LOCAL_LIGHTHOUSE_VERSION="$(/usr/local/bin/lighthouse -V | cut -c 13-17)"
+  # log current version
+  printf "Installed version of Lighthouse is:\t\tv%s\n\n" "$LOCAL_LIGHTHOUSE_VERSION"
 else
   printf "\u274c\n"
   LOCAL_LIGHTHOUSE_VERSION="not installed"
@@ -80,9 +82,6 @@ LATEST_RELEASE_NAME="$(curl -s $SIGP_LIGHTHOUSE_RELEASE_URL | jq -r '[.tag_name,
 
 LATEST_LIGHTHOUSE_BIN_FILENAME=${LATEST_LIGHTHOUSE_BIN_URL##*/}
 LATEST_LIGHTHOUSE_ASC_FILENAME=${LATEST_LIGHTHOUSE_ASC_URL##*/}
-
-# log current version
-printf "Installed version of Lighthouse is:\t\tv%s\n\n" "$LOCAL_LIGHTHOUSE_VERSION"
 
 # log it to console
 printf "Latest available release is:\t\t\t%s\n" "$LATEST_RELEASE_NAME"
