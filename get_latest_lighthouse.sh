@@ -39,8 +39,34 @@ case "$choice" in
   * ) printf "\nInvalid\n"; exit 0;;
 esac
 
-# check local lighthouse version
-LOCAL_LIGHTHOUSE_VERSION="$(/usr/local/bin/lighthouse -V | cut -c 13-17)"
+# check for jq
+printf "Check jq installed:"
+if hash jq 2>/dev/null; then
+  printf " \u2705\n"
+else
+  printf "\u274c\n"
+  echo "You need jq. Install it? "
+  read -r -e -p "(y/n)? " choice
+  if [[ "y" = "$choice" || "Y" = "$choice" ]]; then
+    sudo apt install jq
+  else
+    echo "We need jq. Stopping."
+    exit
+  fi
+fi
+
+# check for existing lighthouse
+printf "Check for existing lighthouse installation:"
+if hash lighthouse 2>/dev/null; then
+  printf " \u2705\n"
+  # save existing lighthouse version
+  LOCAL_LIGHTHOUSE_VERSION="$(/usr/local/bin/lighthouse -V | cut -c 13-17)"
+else
+  printf "\u274c\n"
+  LOCAL_LIGHTHOUSE_VERSION="not installed"
+fi
+
+
 
 # get the latest release binary url
 LATEST_LIGHTHOUSE_BIN_URL="$(curl -s $SIGP_LIGHTHOUSE_RELEASE_URL \
