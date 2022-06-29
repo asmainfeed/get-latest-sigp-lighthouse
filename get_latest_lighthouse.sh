@@ -10,7 +10,7 @@ SIGP_PUBKEY_URL="https://keybase.io/sigp/pgp_keys.asc?fingerprint=15e66d941f697e
 # SIGP/Lighthouse release URL
 SIGP_LIGHTHOUSE_RELEASE_URL="https://api.github.com/repos/sigp/lighthouse/releases/latest"
 # determine current terminal width
-TTY_WIDTH=$(stty -a <"/dev/pts/0" |grep -Po '(?<=columns )\d+')
+TTY_WIDTH=$(stty -a <"$(tty)" |grep columns |cut -f 3 -d ";" | sed 's/[^0-9]*//g')
 # output directory
 OUTPUT_DIR="$HOME/lighthouse_bins"
 
@@ -22,14 +22,12 @@ function repeat_char() {
         echo -n "$char"
     done
 }
-repeat_char '~'
-repeat_char '~'
+repeat_char '='
 printf "NOTE: Assumes lighthouse binary lives at /usr/local/bin/lighthouse\n"
 printf "NOTE: Assumes target binary/arch is x86_64-unknown-linux-gnu.tar.gz\n"
 printf "NOTE: Assumes Sigma Prime PubKey URL is: \n\n"
 printf "\t%s\n\n" "$SIGP_PUBKEY_URL"
-repeat_char '~'
-repeat_char '~'
+repeat_char '='
 
 # prompt continue
 read -rp "Continue? (y/n):  " choice
@@ -40,11 +38,11 @@ case "$choice" in
 esac
 
 # check for jq
-printf "Check jq installed:"
+printf "%-60s" "Check jq installed: "
 if hash jq 2>/dev/null; then
-  printf " \u2705\n"
+  printf "%-60b\n" ' \u2705'
 else
-  printf "\u274c\n"
+  printf "%-60b\n" ' \u274c'
   echo "You need jq. Install it? "
   read -r -e -p "(y/n)? " choice
   if [[ "y" = "$choice" || "Y" = "$choice" ]]; then
@@ -56,19 +54,17 @@ else
 fi
 
 # check for existing lighthouse
-printf "Check for existing lighthouse installation: "
+printf "%-60s" "Check existing lighthouse installation: "
 if hash lighthouse 2>/dev/null; then
-  printf " \u2705\n"
+  printf "%-60b\n" " \u2705"
   # save existing lighthouse version
   LOCAL_LIGHTHOUSE_VERSION="$(/usr/local/bin/lighthouse -V | cut -c 13-17)"
   # log current version
-  printf "Installed version of Lighthouse is:\t\tv%s\n\n" "$LOCAL_LIGHTHOUSE_VERSION"
+  printf "%-60s%-60s\n" "Installed version of Lighthouse is:" " v$LOCAL_LIGHTHOUSE_VERSION"
 else
-  printf "\u274c\n"
+  printf " \u274c\n"
   LOCAL_LIGHTHOUSE_VERSION="not installed"
 fi
-
-
 
 # get the latest release binary url
 LATEST_LIGHTHOUSE_BIN_URL="$(curl -s $SIGP_LIGHTHOUSE_RELEASE_URL \
@@ -84,8 +80,8 @@ LATEST_LIGHTHOUSE_BIN_FILENAME=${LATEST_LIGHTHOUSE_BIN_URL##*/}
 LATEST_LIGHTHOUSE_ASC_FILENAME=${LATEST_LIGHTHOUSE_ASC_URL##*/}
 
 # log it to console
-printf "Latest available release is:\t\t\t%s\n" "$LATEST_RELEASE_NAME"
-printf "Latest available release url:\n\t%s\n\n" "$LATEST_LIGHTHOUSE_BIN_URL"
+printf "%-60s%-60s\n" "Latest available release is:" " $LATEST_RELEASE_NAME"
+printf "%-60s\n\t%-60s\n\n" "Latest available release url:" "$LATEST_LIGHTHOUSE_BIN_URL"
 
 # Check output dir exists
 printf "Checking output directory: %s exists...\n" "$OUTPUT_DIR"
